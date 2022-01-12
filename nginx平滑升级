@@ -1,0 +1,38 @@
+什么是平滑升级
+有时候我们需要对Nginx版本进行升级以满足运维人员对其功能的需求，例如添加xxx模块，需要xxx功能，而此时Nginx又在跑着业务无法停掉，这时我们就只能平滑升级了
+
+平滑升级原理
+Nginx服务接收到USR2信号后，将Nginx.pid文件添加.oldbin变成nginx.pid.oldbin文件；然后执行新版本Nginx服务器的二进制文件启动服务，如果新的服务启动成功，系统中将有新旧两个Nginx主进程共同提供Web服务，之后，需要向旧的Nginx服务进程发送WINCH信号，使旧的Nginx服务平滑停止，并删除Nginx.pid.oldbin文件
+
+查看当前环境，下载nginx
+wget -c http://nginx.org/download/nginx-1.16.0.tar.gz
+
+解压，编译
+例如： ./configure --prefix=/usr/local/nginx/--with-http_stub_status_module --with-http_ssl_module
+执行命令：make
+
+1、进入到nginx的目录：
+   cd {nginx目录}
+
+2、将老的nginx备份：
+   mv nginx nginx.old
+
+3、将新的nginx上传到对应目录，保持用户，权限等都一致
+
+4、执行sudo ./nginx  -t   检查新的nginx是否正常
+
+5、查看老的nginx进程：
+ps -ef|grep nginx
+kill -USR2 {nginx主进程}
+重新查看：ps -ef|grep nginx，此时会有两个nginx主要进程（一个新一个老）
+kill -WINCH {原来nginx主进程}
+随后nginx会逐步关闭没有请求都worker进程，随后
+kill -9 {nginx主进程}
+
+6、确认新的nginx进程和端口与原来一致，到此升级结束
+ps -ef｜grep nginx
+netstat -ntlp
+
+
+
+
