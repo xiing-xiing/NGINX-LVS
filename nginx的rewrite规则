@@ -1,0 +1,5 @@
+标记符号	说明
+last	本条规则匹配完成后继续向下匹配新的location URI规则
+break	本条规则匹配完成后终止，不在匹配任何规则
+redirect	返回302临时重定向
+permanent	返回301永久重定向
